@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.5",
+    "@clerk/nextjs": "^4.15.0",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@prisma/client": "^4.11.0",
@@ -24,6 +25,7 @@
     "next": "^13.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.43.9",
     "superjson": "1.12.2",
     "zod": "^3.21.4"
   },
