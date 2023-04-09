@@ -9,7 +9,7 @@ import {
   NumberInputField,
   NumberInputStepper,
 } from "@chakra-ui/react";
-import { Asset, Value } from "@prisma/client";
+import type { Asset, Value } from "@prisma/client";
 import { useForm } from "react-hook-form";
 
 export function AssetRowForm({
@@ -17,14 +17,17 @@ export function AssetRowForm({
 }: {
   asset: Asset & { values: Value[] };
 }) {
-  const { register, watch, handleSubmit } = useForm({
+  const { register, handleSubmit } = useForm({
     defaultValues: {
       assetName: asset.name,
       value: asset.values[0]?.value,
     },
   });
+  const onSubmit = (data: Record<string, unknown>) => {
+    console.debug(data);
+  };
   return (
-    <form onSubmit={handleSubmit((data) => console.debug(data))}>
+    <form onSubmit={() => handleSubmit(onSubmit)}>
       <Box display="grid" gridTemplateColumns="1fr 1fr minmax(0, 5rem)">
         <FormControl>
           <Input {...register("assetName")} borderRadius={0} type="string" />

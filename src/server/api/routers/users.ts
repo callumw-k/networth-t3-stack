@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { create } from "domain";
 
 export const usersRouter = createTRPCRouter({
   createUser: publicProcedure
