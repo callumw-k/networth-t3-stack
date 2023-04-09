@@ -1,9 +1,12 @@
+import { DefaultLayout } from "@/components/layout";
 import { Heading } from "@chakra-ui/react";
 
 const Home = () => {
-    return (
-        <Heading>hello</Heading>
-    )
+  return (
+    <DefaultLayout>
+      <Heading>hello</Heading>
+    </DefaultLayout>
+  );
 };
 
 export default Home;

@@ -2,9 +2,14 @@ import { appRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-const createUserHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+interface RequestBody extends NextApiRequest {
+  body: {
+    data: { id?: string };
+  };
+}
+const createUserHandler = async (req: RequestBody, res: NextApiResponse) => {
   const ctx = createTRPCContext({ req, res });
   const caller = appRouter.createCaller(ctx);
   try {
