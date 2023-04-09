@@ -12,8 +12,7 @@ datasource db {
 }
 
 model User {
-  id     Int     @id @default(autoincrement())
-  name   String
+  id     String     @id
   assets Asset[]
   values Value[]
 }
@@ -25,7 +24,8 @@ model Asset {
   updatedAt DateTime @updatedAt
   values    Value[]
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
+  userId    String
+  @@index([userId])
 }
 
 model Value {
@@ -33,8 +33,11 @@ model Value {
   value     Int
   createdAt DateTime @default(now())
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
+  userId    String
   asset     Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
   assetId   Int
+
+  @@index([userId])
+  @@index([assetId])
 }
 
