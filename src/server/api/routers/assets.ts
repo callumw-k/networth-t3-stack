@@ -1,15 +1,18 @@
-import { z } from "zod";
-
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
 
 export const assetsRouter = createTRPCRouter({
-  getAll: publicProcedure
-    .input(z.object({ asset_id: z.number() }))
-    .query(async ({ input, ctx }) => {
-      const assets = await ctx.prisma.asset.findMany({
-        where: { userId: input.asset_id },
-        include: { values: { orderBy: { createdAt: "desc" }, take: 5 } },
+  getAllAssetsForUser: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.auth.userId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "No user_id on auth object",
       });
-      return assets;
-    }),
+    }
+    const assets = await ctx.prisma.asset.findMany({
+      where: { userId: ctx.auth.userId },
+      include: { values: { orderBy: { createdAt: "desc" }, take: 5 } },
+    });
+    return assets;
+  }),
 });
