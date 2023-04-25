@@ -1,47 +1,125 @@
+import { api } from "@/utils/api";
 import {
   Box,
-  Button,
   FormControl,
   Input,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
+  type InputProps,
+  type NumberInputFieldProps,
+  Spinner,
+  type NumberInputProps,
+  type BoxProps,
 } from "@chakra-ui/react";
 import type { Asset, Value } from "@prisma/client";
 import { useForm } from "react-hook-form";
+import cloneDeep from "lodash.clonedeep";
+import { CheckIcon } from "@chakra-ui/icons";
 
-export function AssetRowForm({
-  asset,
-}: {
+type AssetRowForm = {
   asset: Asset & { values: Value[] };
-}) {
-  const { register, handleSubmit } = useForm({
+};
+
+export const inputStyles: InputProps = {
+  borderRadius: "none",
+  variant: "outline",
+  border: "1px solid transparent",
+  focusBorderColor: "gray.600",
+};
+
+export const numberInputStyles: {
+  numberInputField: NumberInputFieldProps;
+  numberInput: NumberInputProps;
+} = {
+  numberInputField: {
+    borderRadius: "none",
+    border: "1px solid transparent",
+    _focus: { border: "1px", outline: "none" },
+  },
+  numberInput: {
+    focusBorderColor: "black",
+  },
+};
+
+export const rowStyles: BoxProps = {
+  display: "grid",
+  gridTemplateColumns: "1fr minmax(0, 10rem) minmax(0, 2.5rem)",
+};
+
+type FormProps = {
+  assetName: string;
+  value: number;
+};
+
+export function AssetRowForm({ asset }: AssetRowForm) {
+  const trpcContext = api.useContext();
+  const updateAssetMutation = api.assets.updateAsset.useMutation({
+    onSuccess(data) {
+      const assetsData = cloneDeep(
+        trpcContext.assets.getAllAssetsForUser.getData()
+      );
+      if (!assetsData || !data) return;
+
+      let assetFound = false;
+      for (const [i, asset] of assetsData.entries()) {
+        if (asset.id === data.asset.id) {
+          assetsData[i] = {
+            ...data.asset,
+            values: [data.newValue, ...asset.values],
+          };
+          assetFound = true;
+          break;
+        }
+      }
+
+      if (!assetFound) {
+        assetsData.push({ ...data.asset, values: [data.newValue] });
+      }
+
+      trpcContext.assets.getAllAssetsForUser.setData(undefined, assetsData);
+    },
+  });
+
+  const { register, handleSubmit, watch } = useForm<FormProps>({
     defaultValues: {
       assetName: asset.name,
       value: asset.values[0]?.value,
     },
   });
-  const onSubmit = (data: Record<string, unknown>) => {
-    console.debug(data);
+
+  const onSubmit = (data: FormProps) => {
+    updateAssetMutation.mutate({
+      assetId: asset.id,
+      newValue: data.value,
+      newName: data.assetName,
+    });
   };
+
+  const hasValuesChanged =
+    !(watch("assetName") === asset.name) ||
+    !(watch("value") === asset.values[0]?.value);
+
   return (
-    <form onSubmit={() => handleSubmit(onSubmit)}>
-      <Box display="grid" gridTemplateColumns="1fr 1fr minmax(0, 5rem)">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Box {...rowStyles}>
         <FormControl>
-          <Input {...register("assetName")} borderRadius={0} type="string" />
+          <Input {...inputStyles} {...register("assetName")} type="string" />
         </FormControl>
         <FormControl>
-          <NumberInput allowMouseWheel>
-            <NumberInputField {...register("value")} borderRadius={0} />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
+          <Input
+            {...inputStyles}
+            {...register("value", { valueAsNumber: true })}
+            type="number"
+          />
         </FormControl>
-        <Button type="submit">Submit</Button>
+        {updateAssetMutation.isLoading && (
+          <Box display="flex" justifyContent={"center"} alignItems={"center"}>
+            <Spinner />
+          </Box>
+        )}
+        {!updateAssetMutation.isLoading && hasValuesChanged && (
+          <button aria-label="Update asset" type="submit">
+            <CheckIcon />
+          </button>
+        )}
       </Box>
     </form>
   );
