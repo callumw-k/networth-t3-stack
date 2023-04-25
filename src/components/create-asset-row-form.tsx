@@ -24,7 +24,7 @@ function Form(props: FormProps) {
     watch,
   } = useForm<FormValues>();
   const trpcContext = api.useContext();
-  const mutation = api.assets.createAsset.useMutation({
+  const addAssetMutation = api.assets.createAsset.useMutation({
     onSuccess(data) {
       const assetsData = cloneDeep(
         trpcContext.assets.getAllAssetsForUser.getData()
@@ -35,9 +35,13 @@ function Form(props: FormProps) {
       props.setClickedAddAsset(false);
     },
   });
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (errors.assetName || errors.value) return;
-    mutation.mutate({ assetName: data.assetName, assetValue: data.value });
+    addAssetMutation.mutate({
+      assetName: data.assetName,
+      assetValue: data.value,
+    });
   };
   useEffect(() => {
     return () => {
@@ -46,9 +50,8 @@ function Form(props: FormProps) {
   }, []);
   const correctValues = watch("assetName") && !isNaN(watch("value"));
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Box flexGrow={1}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={void handleSubmit(onSubmit)}>
         <Box {...rowStyles}>
           <FormControl isInvalid={Boolean(errors.assetName)}>
             <Input
@@ -65,12 +68,12 @@ function Form(props: FormProps) {
               {...inputStyles}
             />
           </FormControl>
-          {mutation.isLoading && (
+          {addAssetMutation.isLoading && (
             <Box display="flex" justifyContent={"center"} alignItems={"center"}>
               <Spinner />
             </Box>
           )}
-          {!mutation.isLoading && correctValues && (
+          {!addAssetMutation.isLoading && correctValues && (
             <button aria-label="Update asset" type="submit">
               <CheckIcon />
             </button>
@@ -84,7 +87,6 @@ function Form(props: FormProps) {
 export function CreateAssetRowForm() {
   const [clickedAddAsset, setClickedAddAsset] = useState(false);
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Box>
       {clickedAddAsset && <Form setClickedAddAsset={setClickedAddAsset} />}
       <Button marginTop={4} onClick={() => setClickedAddAsset(true)}>
