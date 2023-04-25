@@ -47,35 +47,37 @@ function Form(props: FormProps) {
   const correctValues = watch("assetName") && !isNaN(watch("value"));
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Box {...rowStyles}>
-        <FormControl isInvalid={Boolean(errors.assetName)}>
-          <Input
-            placeholder="Add new asset"
-            {...register("assetName", { required: true })}
-            {...inputStyles}
-          />
-        </FormControl>
-        <FormControl isInvalid={Boolean(errors.value)}>
-          <Input
-            type="number"
-            placeholder="420"
-            {...register("value", { valueAsNumber: true, required: true })}
-            {...inputStyles}
-          />
-        </FormControl>
-        {mutation.isLoading && (
-          <Box display="flex" justifyContent={"center"} alignItems={"center"}>
-            <Spinner />
-          </Box>
-        )}
-        {!mutation.isLoading && correctValues && (
-          <button aria-label="Update asset" type="submit">
-            <CheckIcon />
-          </button>
-        )}
-      </Box>
-    </form>
+    <Box flexGrow={1}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Box {...rowStyles}>
+          <FormControl isInvalid={Boolean(errors.assetName)}>
+            <Input
+              placeholder="Add new asset"
+              {...register("assetName", { required: true })}
+              {...inputStyles}
+            />
+          </FormControl>
+          <FormControl isInvalid={Boolean(errors.value)}>
+            <Input
+              type="number"
+              placeholder="420"
+              {...register("value", { valueAsNumber: true, required: true })}
+              {...inputStyles}
+            />
+          </FormControl>
+          {mutation.isLoading && (
+            <Box display="flex" justifyContent={"center"} alignItems={"center"}>
+              <Spinner />
+            </Box>
+          )}
+          {!mutation.isLoading && correctValues && (
+            <button aria-label="Update asset" type="submit">
+              <CheckIcon />
+            </button>
+          )}
+        </Box>
+      </form>
+    </Box>
   );
 }
 
@@ -83,7 +85,7 @@ export function CreateAssetRowForm() {
   const [clickedAddAsset, setClickedAddAsset] = useState(false);
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <Box display={"flex"} alignItems={"flex-start"} flexDirection={"column"}>
+    <Box>
       {clickedAddAsset && <Form setClickedAddAsset={setClickedAddAsset} />}
       <Button marginTop={4} onClick={() => setClickedAddAsset(true)}>
         Add new asset
