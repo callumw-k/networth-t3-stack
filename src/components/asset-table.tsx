@@ -5,7 +5,6 @@ import { Box, Container, Spinner } from "@chakra-ui/react";
 
 export function AssetTable() {
   const response = api.assets.getAllAssetsForUser.useQuery();
-  //map over the data and return the asset row form
   if (response.isLoading) {
     return (
       <Container maxW={"4xl"}>

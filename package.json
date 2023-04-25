@@ -22,7 +22,6 @@
     "@trpc/next": "^10.21.1",
     "@trpc/react-query": "^10.21.1",
     "@trpc/server": "^10.21.1",
-    "core-js": "^3.30.1",
     "framer-motion": "^10.12.4",
     "lodash.clonedeep": "^4.5.0",
     "next": "^13.3.1",
