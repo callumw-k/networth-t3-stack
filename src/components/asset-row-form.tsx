@@ -98,6 +98,7 @@ export function AssetRowForm({ asset }: AssetRowForm) {
     !(watch("value") === asset.values[0]?.value);
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form onSubmit={handleSubmit(onSubmit)}>
       <Box {...rowStyles}>
         <FormControl>

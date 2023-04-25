@@ -46,6 +46,7 @@ function Form(props: FormProps) {
   }, []);
   const correctValues = watch("assetName") && !isNaN(watch("value"));
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form onSubmit={handleSubmit(onSubmit)}>
       <Box {...rowStyles}>
         <FormControl isInvalid={Boolean(errors.assetName)}>
