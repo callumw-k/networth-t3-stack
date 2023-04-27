@@ -8,11 +8,13 @@ import {
   Spinner,
   type NumberInputProps,
   type BoxProps,
+  Button,
 } from "@chakra-ui/react";
 import type { Asset, Value } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import cloneDeep from "lodash.clonedeep";
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { ButtonLoading } from "./button-loading";
 
 type AssetRowForm = {
   asset: Asset & { values: Value[] };
@@ -41,7 +43,8 @@ export const numberInputStyles: {
 
 export const rowStyles: BoxProps = {
   display: "grid",
-  gridTemplateColumns: "1fr minmax(0, 10rem) minmax(0, 2.5rem)",
+  gridTemplateColumns:
+    "1fr minmax(0, 10rem) minmax(0, 2.5rem) minmax(0, 2.5rem)",
 };
 
 type FormProps = {
@@ -51,6 +54,14 @@ type FormProps = {
 
 export function AssetRowForm({ asset }: AssetRowForm) {
   const trpcContext = api.useContext();
+  const deleteAssetMutation = api.assets.deleteAsset.useMutation({
+    onSuccess(data) {
+      const oldData = trpcContext.assets.getAllAssetsForUser.getData();
+      if (!oldData || !data) return;
+      const updatedAssets = oldData.filter((asset) => asset.id !== data.id);
+      trpcContext.assets.getAllAssetsForUser.setData(undefined, updatedAssets);
+    },
+  });
   const updateAssetMutation = api.assets.updateAsset.useMutation({
     onSuccess(data) {
       const assetsData = cloneDeep(
@@ -98,8 +109,7 @@ export function AssetRowForm({ asset }: AssetRowForm) {
     !(watch("value") === asset.values[0]?.value);
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}>
       <Box {...rowStyles}>
         <FormControl>
           <Input {...inputStyles} {...register("assetName")} type="string" />
@@ -111,16 +121,27 @@ export function AssetRowForm({ asset }: AssetRowForm) {
             type="number"
           />
         </FormControl>
-        {updateAssetMutation.isLoading && (
-          <Box display="flex" justifyContent={"center"} alignItems={"center"}>
-            <Spinner />
-          </Box>
-        )}
-        {!updateAssetMutation.isLoading && hasValuesChanged && (
-          <button aria-label="Update asset" type="submit">
-            <CheckIcon />
-          </button>
-        )}
+        <ButtonLoading
+          aria-label="Update asset"
+          variant={"unstyled"}
+          type="submit"
+          isLoading={updateAssetMutation.isLoading}
+          isVisible={hasValuesChanged}
+        >
+          <CheckIcon />
+        </ButtonLoading>
+        <Box gridColumnStart={4}>
+          <ButtonLoading
+            variant={"unstyled"}
+            type="button"
+            aria-label="Delete asset"
+            onClick={() => deleteAssetMutation.mutate({ assetId: asset.id })}
+            isLoading={deleteAssetMutation.isLoading}
+            isVisible={true}
+          >
+            <CloseIcon boxSize={3.5} />
+          </ButtonLoading>
+        </Box>
       </Box>
     </form>
   );

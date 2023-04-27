@@ -4,7 +4,8 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { inputStyles, rowStyles } from "./asset-row-form";
 import { CheckIcon } from "@chakra-ui/icons";
 import cloneDeep from "lodash.clonedeep";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ButtonLoading } from "./button-loading";
 
 type FormValues = {
   assetName: string;
@@ -24,7 +25,7 @@ function Form(props: FormProps) {
     watch,
   } = useForm<FormValues>();
   const trpcContext = api.useContext();
-  const mutation = api.assets.createAsset.useMutation({
+  const addAssetMutation = api.assets.createAsset.useMutation({
     onSuccess(data) {
       const assetsData = cloneDeep(
         trpcContext.assets.getAllAssetsForUser.getData()
@@ -35,20 +36,20 @@ function Form(props: FormProps) {
       props.setClickedAddAsset(false);
     },
   });
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (errors.assetName || errors.value) return;
-    mutation.mutate({ assetName: data.assetName, assetValue: data.value });
+    addAssetMutation.mutate({
+      assetName: data.assetName,
+      assetValue: data.value,
+    });
   };
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
-  const correctValues = watch("assetName") && !isNaN(watch("value"));
+
+  const hasBothValues = Boolean(watch("value")) && Boolean(watch("assetName"));
+
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Box flexGrow={1}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}>
         <Box {...rowStyles}>
           <FormControl isInvalid={Boolean(errors.assetName)}>
             <Input
@@ -65,16 +66,14 @@ function Form(props: FormProps) {
               {...inputStyles}
             />
           </FormControl>
-          {mutation.isLoading && (
-            <Box display="flex" justifyContent={"center"} alignItems={"center"}>
-              <Spinner />
-            </Box>
-          )}
-          {!mutation.isLoading && correctValues && (
-            <button aria-label="Update asset" type="submit">
-              <CheckIcon />
-            </button>
-          )}
+          <ButtonLoading
+            isLoading={addAssetMutation.isLoading}
+            isVisible={hasBothValues}
+            type="submit"
+            variant={"unstyled"}
+          >
+            <CheckIcon />
+          </ButtonLoading>
         </Box>
       </form>
     </Box>
@@ -84,11 +83,13 @@ function Form(props: FormProps) {
 export function CreateAssetRowForm() {
   const [clickedAddAsset, setClickedAddAsset] = useState(false);
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Box>
       {clickedAddAsset && <Form setClickedAddAsset={setClickedAddAsset} />}
-      <Button marginTop={4} onClick={() => setClickedAddAsset(true)}>
-        Add new asset
+      <Button
+        marginTop={4}
+        onClick={() => setClickedAddAsset(!clickedAddAsset)}
+      >
+        {clickedAddAsset ? "Cancel" : "Add new asset"}
       </Button>
     </Box>
   );

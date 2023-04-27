@@ -77,4 +77,16 @@ export const assetsRouter = createTRPCRouter({
         });
       }
     }),
+  deleteAsset: protectedProcedure
+    .input(z.object({ assetId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.prisma.asset.delete({ where: { id: input.assetId } });
+      } catch (e) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: (e as Error).message,
+        });
+      }
+    }),
 });
