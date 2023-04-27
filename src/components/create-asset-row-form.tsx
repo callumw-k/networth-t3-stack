@@ -4,7 +4,8 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { inputStyles, rowStyles } from "./asset-row-form";
 import { CheckIcon } from "@chakra-ui/icons";
 import cloneDeep from "lodash.clonedeep";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ButtonLoading } from "./button-loading";
 
 type FormValues = {
   assetName: string;
@@ -43,15 +44,12 @@ function Form(props: FormProps) {
       assetValue: data.value,
     });
   };
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
-  const correctValues = watch("assetName") && !isNaN(watch("value"));
+
+  const hasBothValues = Boolean(watch("value")) && Boolean(watch("assetName"));
+
   return (
     <Box flexGrow={1}>
-      <form onSubmit={void handleSubmit(onSubmit)}>
+      <form onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}>
         <Box {...rowStyles}>
           <FormControl isInvalid={Boolean(errors.assetName)}>
             <Input
@@ -68,16 +66,14 @@ function Form(props: FormProps) {
               {...inputStyles}
             />
           </FormControl>
-          {addAssetMutation.isLoading && (
-            <Box display="flex" justifyContent={"center"} alignItems={"center"}>
-              <Spinner />
-            </Box>
-          )}
-          {!addAssetMutation.isLoading && correctValues && (
-            <button aria-label="Update asset" type="submit">
-              <CheckIcon />
-            </button>
-          )}
+          <ButtonLoading
+            isLoading={addAssetMutation.isLoading}
+            isVisible={hasBothValues}
+            type="submit"
+            variant={"unstyled"}
+          >
+            <CheckIcon />
+          </ButtonLoading>
         </Box>
       </form>
     </Box>
@@ -89,8 +85,11 @@ export function CreateAssetRowForm() {
   return (
     <Box>
       {clickedAddAsset && <Form setClickedAddAsset={setClickedAddAsset} />}
-      <Button marginTop={4} onClick={() => setClickedAddAsset(true)}>
-        Add new asset
+      <Button
+        marginTop={4}
+        onClick={() => setClickedAddAsset(!clickedAddAsset)}
+      >
+        {clickedAddAsset ? "Cancel" : "Add new asset"}
       </Button>
     </Box>
   );

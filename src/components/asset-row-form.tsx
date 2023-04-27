@@ -14,6 +14,7 @@ import type { Asset, Value } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import cloneDeep from "lodash.clonedeep";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { ButtonLoading } from "./button-loading";
 
 type AssetRowForm = {
   asset: Asset & { values: Value[] };
@@ -108,8 +109,7 @@ export function AssetRowForm({ asset }: AssetRowForm) {
     !(watch("value") === asset.values[0]?.value);
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}>
       <Box {...rowStyles}>
         <FormControl>
           <Input {...inputStyles} {...register("assetName")} type="string" />
@@ -121,25 +121,27 @@ export function AssetRowForm({ asset }: AssetRowForm) {
             type="number"
           />
         </FormControl>
-        {updateAssetMutation.isLoading && (
-          <Box display="flex" justifyContent={"center"} alignItems={"center"}>
-            <Spinner />
-          </Box>
-        )}
-        {!updateAssetMutation.isLoading && hasValuesChanged && (
-          <button aria-label="Update asset" type="submit">
-            <CheckIcon />
-          </button>
-        )}
-        <Button
+        <ButtonLoading
+          aria-label="Update asset"
           variant={"unstyled"}
-          gridColumnStart={4}
-          type="button"
-          aria-label="Delete asset"
-          onClick={() => deleteAssetMutation.mutate({ assetId: asset.id })}
+          type="submit"
+          isLoading={updateAssetMutation.isLoading}
+          isVisible={hasValuesChanged}
         >
-          <CloseIcon />
-        </Button>
+          <CheckIcon />
+        </ButtonLoading>
+        <Box gridColumnStart={4}>
+          <ButtonLoading
+            variant={"unstyled"}
+            type="button"
+            aria-label="Delete asset"
+            onClick={() => deleteAssetMutation.mutate({ assetId: asset.id })}
+            isLoading={deleteAssetMutation.isLoading}
+            isVisible={true}
+          >
+            <CloseIcon boxSize={3.5} />
+          </ButtonLoading>
+        </Box>
       </Box>
     </form>
   );
