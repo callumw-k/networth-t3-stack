@@ -5,7 +5,7 @@ type LoadingButtonProps = {
   isLoading: boolean;
   isVisible: boolean;
 } & Partial<ButtonProps>;
-export function ButtonLoading(props: LoadingButtonProps) {
+export function ButtonWithLoadingState(props: LoadingButtonProps) {
   const { children, isLoading, isVisible, ...rest } = props;
   if (isLoading) {
     return (

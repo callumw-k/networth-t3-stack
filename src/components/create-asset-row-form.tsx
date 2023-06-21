@@ -1,11 +1,11 @@
 import { api } from "@/utils/api";
-import { Box, Button, FormControl, Input, Spinner } from "@chakra-ui/react";
+import { Box, Button, FormControl, Input } from "@chakra-ui/react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { inputStyles, rowStyles } from "./asset-row-form";
 import { CheckIcon } from "@chakra-ui/icons";
 import cloneDeep from "lodash.clonedeep";
 import { useState } from "react";
-import { ButtonLoading } from "./button-loading";
+import { ButtonWithLoadingState } from "./button-with-loading-state";
 
 type FormValues = {
   assetName: string;
@@ -21,7 +21,6 @@ function Form(props: FormProps) {
     register,
     formState: { errors },
     handleSubmit,
-    reset,
     watch,
   } = useForm<FormValues>();
   const trpcContext = api.useContext();
@@ -66,14 +65,14 @@ function Form(props: FormProps) {
               {...inputStyles}
             />
           </FormControl>
-          <ButtonLoading
+          <ButtonWithLoadingState
             isLoading={addAssetMutation.isLoading}
             isVisible={hasBothValues}
             type="submit"
             variant={"unstyled"}
           >
             <CheckIcon />
-          </ButtonLoading>
+          </ButtonWithLoadingState>
         </Box>
       </form>
     </Box>

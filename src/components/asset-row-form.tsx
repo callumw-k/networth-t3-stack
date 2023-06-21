@@ -5,16 +5,15 @@ import {
   Input,
   type InputProps,
   type NumberInputFieldProps,
-  Spinner,
   type NumberInputProps,
   type BoxProps,
-  Button,
 } from "@chakra-ui/react";
 import type { Asset, Value } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import cloneDeep from "lodash.clonedeep";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
-import { ButtonLoading } from "./button-loading";
+import { ButtonWithLoadingState } from "./button-with-loading-state";
+import { AssetValuesModal } from "./asset-values-modal";
 
 type AssetRowForm = {
   asset: Asset & { values: Value[] };
@@ -44,7 +43,7 @@ export const numberInputStyles: {
 export const rowStyles: BoxProps = {
   display: "grid",
   gridTemplateColumns:
-    "1fr minmax(0, 10rem) minmax(0, 2.5rem) minmax(0, 2.5rem)",
+    "1fr minmax(0, 10rem) minmax(0, 2.5rem) minmax(0, 2.5rem) minmax(0, 2.5rem)",
 };
 
 type FormProps = {
@@ -121,7 +120,7 @@ export function AssetRowForm({ asset }: AssetRowForm) {
             type="number"
           />
         </FormControl>
-        <ButtonLoading
+        <ButtonWithLoadingState
           aria-label="Update asset"
           variant={"unstyled"}
           type="submit"
@@ -129,9 +128,9 @@ export function AssetRowForm({ asset }: AssetRowForm) {
           isVisible={hasValuesChanged}
         >
           <CheckIcon />
-        </ButtonLoading>
+        </ButtonWithLoadingState>
         <Box gridColumnStart={4}>
-          <ButtonLoading
+          <ButtonWithLoadingState
             variant={"unstyled"}
             type="button"
             aria-label="Delete asset"
@@ -140,8 +139,9 @@ export function AssetRowForm({ asset }: AssetRowForm) {
             isVisible={true}
           >
             <CloseIcon boxSize={3.5} />
-          </ButtonLoading>
+          </ButtonWithLoadingState>
         </Box>
+        <AssetValuesModal assetId={asset.id} />
       </Box>
     </form>
   );
