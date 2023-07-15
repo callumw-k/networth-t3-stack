@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import cloneDeep from "lodash.clonedeep";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import { ButtonLoading } from "./button-loading";
+import { AssetDetails } from "./asset-details";
 
 type AssetRowForm = {
   asset: Asset & { values: Value[] };
@@ -44,7 +45,7 @@ export const numberInputStyles: {
 export const rowStyles: BoxProps = {
   display: "grid",
   gridTemplateColumns:
-    "1fr minmax(0, 10rem) minmax(0, 2.5rem) minmax(0, 2.5rem)",
+    "1fr minmax(0, 10rem) minmax(0, 2.5rem) minmax(0, 2.5rem)  minmax(0, 2.5rem)",
 };
 
 type FormProps = {
@@ -54,6 +55,7 @@ type FormProps = {
 
 export function AssetRowForm({ asset }: AssetRowForm) {
   const trpcContext = api.useContext();
+
   const deleteAssetMutation = api.assets.deleteAsset.useMutation({
     onSuccess(data) {
       const oldData = trpcContext.assets.getAllAssetsForUser.getData();
@@ -62,14 +64,21 @@ export function AssetRowForm({ asset }: AssetRowForm) {
       trpcContext.assets.getAllAssetsForUser.setData(undefined, updatedAssets);
     },
   });
+
   const updateAssetMutation = api.assets.updateAsset.useMutation({
     onSuccess(data) {
       const assetsData = cloneDeep(
         trpcContext.assets.getAllAssetsForUser.getData()
       );
+
       if (!assetsData || !data) return;
 
+      void trpcContext.assets.getDetailsForAsset.invalidate({
+        assetId: data?.asset.id,
+      });
+
       let assetFound = false;
+
       for (const [i, asset] of assetsData.entries()) {
         if (asset.id === data.asset.id) {
           assetsData[i] = {
@@ -142,6 +151,7 @@ export function AssetRowForm({ asset }: AssetRowForm) {
             <CloseIcon boxSize={3.5} />
           </ButtonLoading>
         </Box>
+        <AssetDetails asset={asset} />
       </Box>
     </form>
   );
